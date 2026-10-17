@@ -9,7 +9,7 @@ const archive=new URL('local/cloud-evaluator.zip',root);
 try {
  for(const path of ['scripts/','prompts/','config/']) mkdirSync(new URL(path,directory),{recursive:true});
  // Explicit allowlist; personalized profile is private data even without credentials.
- for(const path of ['AGENTS.md','scripts/lib.mjs','scripts/radar.mjs','scripts/save-evaluations.mjs','prompts/daily-review.md','prompts/cloud-setup.md','config/profile.json'])
+ for(const path of ['AGENTS.md','scripts/lib.mjs','scripts/radar.mjs','scripts/save-evaluations.mjs','prompts/review.md','prompts/cloud-setup.md','config/profile.json'])
   copyFileSync(new URL(path,root),new URL(path,directory));
  writeFileSync(new URL('ENVIRONMENT.txt',directory),`SUPABASE_URL=${url}\nRADAR_EVALUATOR_TOKEN=<supply via secret settings>\nRuntime: Node 22+\nNetwork: HTTPS ${new URL(url).hostname}:443\nRead prompts/cloud-setup.md. This archive contains your profile but no credentials.\n`);
  rmSync(archive,{force:true});

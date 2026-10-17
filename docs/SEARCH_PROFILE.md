@@ -40,7 +40,7 @@ plan üretir; scrape başlatmaz ve değerlendirme işlerini sahiplenmez.
   filtresi keşif önceliğidir; dönen kayıtlarda gerçek deneyim ve sorumluluk şartlarını
   değerlendirici inceler. Eski profil sürümleri kendi başlık filtresini korur.
 - Hariç tutulan roller `preferences.excluded_roles` içinde kullanıcı tarafından belirlenir.
-- Nihai karar, günlük değerlendirme sözleşmesindeki CV kanıtı/sorumluluk/zorunlu şart
+- Nihai karar, değerlendirme sözleşmesindeki CV kanıtı/sorumluluk/zorunlu şart
   çerçevesine göre verilir. Beceriler sayılmaz; tercih edilen araç ile gerçek uzmanlık
   gereksinimi ayrılır. Ülke uygunluğu teknik uyum puanından ayrı tutulur.
 
@@ -84,7 +84,7 @@ anlamına gelmez ve ham kayıtlar silinmez. Kuyrukta `skipped` olarak ayrılırl
 
 Ücretsiz Apify güvenlik tavanı profil üzerinden yükseltilemez: çalışma başına 0,05 dolar,
 son 31 gün rezervasyonu 3,50 dolar, doğrulanmış FREE hesap/5 dolar kredi. İsteğe bağlı Cron
-07.00/19.00 TR; AI değerlendirme görevi ayrıca kurulup doğrulanır.
+07.00/19.00 TR; AI değerlendirmesi yalnızca kullanıcı isteğiyle çalıştırılır; günlük ajan kontrolü iptal edilmiştir.
 
 Mevcut doğrulayıcı tam zamanlı ana hedef ve yüksek öncelikli staj sorgusunu zorunlu
 tutar. Yalnız kıdemli veya stajsız arama için doğrulayıcı/testler de uyarlanmalıdır.

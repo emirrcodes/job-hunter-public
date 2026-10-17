@@ -8,18 +8,18 @@ ajanınız `scripts/radar.mjs` ile kendi Supabase gateway'inizi kullanır.
 | SUPABASE_URL | Kendi projenizin `https://<project-ref>.supabase.co` adresi |
 | RADAR_EVALUATOR_TOKEN | setup:init ile oluşan evaluator token; ortamın gizli ayarında |
 | Ağ | Kendi Supabase alan adınıza HTTPS/443 |
-| Talimat | prompts/cloud-setup.md, ardından prompts/daily-review.md |
+| Talimat | prompts/cloud-setup.md, ardından prompts/review.md |
 
-Günlük ajanınıza yönetim, DB, service_role, collector veya Apify anahtarı vermeyin.
+Değerlendirici ajanınıza yönetim, DB, service_role, collector veya Apify anahtarı vermeyin.
 Yerel `.env.local` buluta otomatik aktarılmaz. Repo fork/clone edilebilir; isterseniz
 `npm run cloud:package` yalnızca istemci/talimat/profil içeren özel bir ZIP üretir.
 ZIP anahtarsızdır ama kişisel profil içerir: public dosya olarak paylaşmayın.
 
 Önce aynı ortamda status/profile, sonra bir gerçek claim/save/shortlist testi yapın.
-Bu, ajan bağlantısını doğrular. Günlük tetikleyici ayrıca kurulup aynı ortam ve secret
-ile gerçek çalışması doğrulanır. Repo veya ortam oluşturulması tek başına zamanlama
-kurmaz. Bulut veya yerel yürütme durumunu açıkça raporlayın; ürün özelliklerini tek
-bir aracın sınırından çıkarmayın. Bu repo ek ücretli model API worker'ı etkinleştirmez.
+Bu, istek üzerine ajan bağlantısını doğrular. Günlük otomatik ajan kontrolü iptal
+edilmiştir; değerlendirme zamanlaması veya onun yerine yerel otomasyon kurulmaz.
+Kullanıcı değerlendirme istediğinde ajan aynı ortamda çalıştırılır. Supabase ilan
+toplama Cron'u ayrı kalır. Bu repo ek ücretli model API worker'ı etkinleştirmez.
 
 ## HTTP sözleşmesi
 

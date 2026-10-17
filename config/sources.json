@@ -6,11 +6,11 @@
       "07:00",
       "19:00"
     ],
-    "evaluation_runs_per_day": 1,
+    "evaluation_runs_per_day": 0,
     "evaluation_time": null,
     "collection_enabled": false,
     "evaluation_enabled": false,
-    "note": "Template only; no schedules exist until setup and a successful pilot."
+    "note": "Collection Cron is optional after a successful pilot. Automatic daily agent review is cancelled; evaluation is on demand only."
   },
   "spending": {
     "mode": "trial_only",

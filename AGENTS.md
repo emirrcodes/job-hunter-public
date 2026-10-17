@@ -1,7 +1,7 @@
 # Job Hunter Public — ajan çalışma sözleşmesi
 
 Bu repo paylaşılabilir bir şablondur. Önce `docs/SETUP.md` ve görevle ilgili prompt'u oku.
-Kurulum: `prompts/setup.md`. Günlük değerlendirme: `prompts/daily-review.md`.
+Kurulum: `prompts/setup.md`. İstek üzerine değerlendirme: `prompts/review.md`.
 
 - Her kullanıcı kendi Supabase projesini, Apify hesabını ve CV profilini kullanır.
   Başka bir kurulumun adresini, anahtarını, aday kimliğini veya canlı durumunu varsayma.
@@ -33,8 +33,9 @@ Kurulum: `prompts/setup.md`. Günlük değerlendirme: `prompts/daily-review.md`.
 - Uygulanmış migration dosyalarını değiştirme; yeni migration ekle.
 - `npm test`, `npm run db:test`, `npm run gateway:smoke` ilgili doğrulamalardır.
   SQL testleri yalnızca ayrı geçici yerel DB oluşturur. Canlı pilot ayrı ve kredi tüketebilir.
-- Toplama Cron'u ve ajan değerlendirme zamanlamasını ayrı doğrula. Yerel otomasyonu
-  bulut görevi gibi sunma. Araç sınırını ürünün bütün özelliklerine genelleme.
+- Günlük otomatik ajan kontrolü iptal edilmiştir. Değerlendirme yalnızca kullanıcı
+  istediğinde yapılır; günlük ajan görevi veya onun yerine yerel otomasyon kurma.
+  İlan toplama Cron'u bu karardan ayrıdır; toplama ayarlarını bu nedenle değiştirme.
 - Bu repo model worker/API harcaması kurmaz. Kullanıcı istemedikçe ücretli alternatif etkinleştirme.
 - Public sürüme kişisel CV, `.env.local`, ham ilanlar, claim dosyaları, rapor arşivleri
   veya mevcut özel repo geçmişi ekleme. `npm run release:check` çalıştır.

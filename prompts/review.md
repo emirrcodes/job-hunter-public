@@ -1,8 +1,8 @@
-# Günlük değerlendirme sözleşmesi
+# İstek üzerine değerlendirme sözleşmesi
 
-Bulut görevinde erişim ve yazma denemesi başarılı olduktan sonra kullanılacak.
-Toplayıcı ve ajan zamanlaması bu kopya için ayrıca doğrulanır; kurulu olduklarını varsayma.
-Yalnızca kullanıcı tarafından istenen zamanda çalış. Başvuruları gönderme, kimseye mesaj gönderme.
+Değerlendirme yalnızca kullanıcının açık isteğiyle çalıştırılır. Günlük otomatik
+ajan kontrolü iptal edilmiştir; zamanlanmış ajan görevi kurma. İlan toplama Cron'u
+ayrı bir süreçtir. Erişim ve yazma testini doğrula; başvuru veya mesaj gönderme.
 
 İstemci Node 22+: `node scripts/radar.mjs status`, `profile`, `shortlist`.
 Sadece SUPABASE_URL ve RADAR_EVALUATOR_TOKEN gerekir; sırları çıktıya yazma.

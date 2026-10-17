@@ -20,14 +20,15 @@ veya örnek profilin benim CV'm olduğu varsayımı yapma.
 6. Bu kurulum isteği tek pilotu kapsar: pilot:enable ardından bir collect çağrısı yap.
    Kredi tüketebileceğini ve 0,05 USD tavanını bildir. Durum/poll ile mevcut run'ı
    tamamla. Belirsiz başlangıcı tekrar etme; her kaynağın sonucunu ayrı kontrol et.
-7. prompts/daily-review.md sözleşmesiyle tek gerçek claim/save/shortlist testi yap.
+7. prompts/review.md sözleşmesiyle tek gerçek claim/save/shortlist testi yap.
    İş yoksa sahte veri yazma. Değerlendirme için canlı profili oku.
 8. Kendi projemin adresini, test/pilot sonucunu ve eksikleri anahtarsız raporla.
    Kurulum isteğimde zamanlama da varsa pilot koşulları sağlanınca toplama Cron'unu
    kur ve durumunu doğrula. İstenmemiş zamanlama veya ücretli model worker'ı kurma.
-9. Günlük kullanımda status/shortlist ve küçük claim/save partilerini anlat.
-   Bulut ajanı isteniyorsa yalnızca URL/evaluator token ile ayrı ortam testi yap;
-   bulut tetiklemesini gerçekten doğrulamadan bilgisayar kapalı çalışır deme.
+9. İstek üzerine kullanımda status/shortlist ve küçük claim/save partilerini anlat.
+   Bulut ajanı isteniyorsa yalnızca URL/evaluator token ile ayrı ortam testi yap.
+   Günlük otomatik ajan kontrolü iptal edilmiştir; değerlendirme yalnızca kullanıcı
+   istediğinde yapılır. Ajan zamanlaması veya onun yerine yerel otomasyon kurma.
 
 Başvuru yapma, kişilere mesaj gönderme, insan kararlarını değiştirme.
 Public paylaşılacak kopyaya kişisel profil, anahtar, ham veri veya özel Git geçmişi ekleme.

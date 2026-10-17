@@ -17,7 +17,7 @@ Sonuçları terminalden veya ajanınıza sorarak okuyabilirsiniz.
    API token'ınız gerekir. Node 22+, npm, Supabase CLI ve PostgreSQL `psql` kullanılır.
 3. `config/profile.json` içindeki örnek arama ayarlarını ve boş CV alanlarını kendinize göre doldurun.
 4. [Ajan kurulum talimatını](prompts/setup.md) kendi kodlama ajanınıza verin.
-5. Kurulumdan sonra [günlük değerlendirme talimatını](prompts/daily-review.md) kullanın.
+5. Kurulumdan sonra [istek üzerine değerlendirme talimatını](prompts/review.md) kullanın.
 
 Ajanınıza şu mesajı gönderebilirsiniz:
 
@@ -50,10 +50,10 @@ ve pilot için [rehberin devamını](docs/SETUP.md) tamamlayın.
   `npm run radar -- status` kaynak sağlığını ve kuyruğu gösterir.
 - **Kontrol:** İnsan kararları ayrı tutulur. Sistem başvuru göndermez ve kişilere mesaj atmaz.
 
-Toplama zamanlaması ve AI değerlendirme zamanlaması ayrı kurulumlardır. Bu repo
-kendi başına bir ajan/model çalıştırmaz; günlük AI görevi otomatik kurulmuş gelmez.
-Ajanın bulutta çalışması için aynı ortamda kod, ağ erişimi ve evaluator secret bulunmalıdır.
-[Bulut ajan rehberi](docs/CLOUD.md) bu ayrımı ve HTTP sözleşmesini açıklar.
+AI değerlendirmesi yalnızca kullanıcı istediğinde yapılır; günlük otomatik ajan
+kontrolü kapsamdan çıkarılmıştır. Supabase'in ilan toplama Cron'u ayrı çalışır.
+İstek üzerine kullanılacak bir bulut ajanı için aynı ortamda kod, ağ erişimi ve
+evaluator secret bulunmalıdır. [Ajan bağlantı rehberi](docs/CLOUD.md) ayrıntıları açıklar.
 
 ## Kapsam ve maliyet
 

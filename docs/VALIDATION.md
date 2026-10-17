@@ -23,5 +23,5 @@ Yerel kontroller:
 Bu kontroller arkadaşınızın yeni Supabase/Apify hesabında canlı kurulum testi yerine
 geçmez. Yeni hesap oluşturulmamış ve yayın hazırlığında scrape başlatılmamıştır.
 Her kullanıcı `docs/SETUP.md` sırasıyla kendi gateway smoke, gerçek kaynak pilotu ve
-tek iş claim/save/shortlist testini yapmalıdır. Günlük AI bulut tetiklemesi ayrı
-ortam doğrulaması gerektirir; bu repoyu klonlamak onu kurmaz.
+tek iş claim/save/shortlist testini yapmalıdır. Günlük otomatik ajan kontrolü
+iptal edilmiştir; değerlendirme yalnızca kullanıcı isteğiyle yapılır.

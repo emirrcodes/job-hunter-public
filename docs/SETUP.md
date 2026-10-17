@@ -47,7 +47,7 @@ geçmişine yazmayın. Dosyadaki şu alanları **kendi** hesabınızdan doldurun
 | RADAR_COLLECTOR_TOKEN / EVALUATOR_TOKEN / READER_TOKEN | `setup:init` oluşturdu; değiştirmek gerekmez |
 
 İlk kurulumda migration bağlantısı yeni projenizin `postgres` sahibi olabilir; bu
-hesap günlük ajana verilmez. Örnek URL biçimleri, gerçek host'u Dashboard'dan kopyalayın:
+hesap değerlendirici ajana verilmez. Örnek URL biçimleri, gerçek host'u Dashboard'dan kopyalayın:
 
 ```text
 postgresql://postgres@db.<project-ref>.supabase.co:5432/postgres?sslmode=require
@@ -145,7 +145,7 @@ Kaynak sonucu yoksa/bozuksa bunu açıkça raporlayın. Sahte ilan/değerlendirm
 ## 6. Kendi ajanınızı bağlayın
 
 Kurulum yapan ajan için `prompts/setup.md`; yalnızca değerlendirme yapacak ajan için
-`prompts/cloud-setup.md` ve `prompts/daily-review.md` dosyalarını kullanın.
+`prompts/cloud-setup.md` ve `prompts/review.md` dosyalarını kullanın.
 Değerlendiriciye sadece **SUPABASE_URL + RADAR_EVALUATOR_TOKEN** verin.
 Ajanın shell/Node ve HTTPS erişimi olmalıdır; gateway doğrudan MCP sunucusu değildir.
 
@@ -181,10 +181,10 @@ görevi sadece mevcut LinkedIn run'ı varsa gateway'i çağırır. Vault secret'
 script tarafından oluşturulur. `schedule:status` kurulumdan önce pg_cron yoksa hata verebilir.
 Başka saat dilimi isterseniz `supabase/setup/schedule.sql` ve ilgili belgeleri güncelleyin.
 
-**AI ajan değerlendirmesi ayrıca tetiklenir.** Kullanıcının seçtiği ajan/zamanlayıcının
-repo, token ve ağ erişimini gerçekten kullandığını test etmeden günlük görevi
-kuruldu saymayın. Bir yerel zamanlayıcı bilgisayar kapalıyken çalışma garantisi vermez.
-Ek model API maliyeti veya bulut aboneliği otomatik etkinleştirilmez.
+**AI değerlendirmesi yalnızca kullanıcı istediğinde yapılır.** Günlük otomatik
+ajan kontrolü iptal edilmiştir; ajan zamanlaması veya onun yerine yerel otomasyon
+kurmayın. Yukarıdaki Cron yalnızca ilan toplar. Ek model API maliyeti veya bulut
+aboneliği otomatik etkinleştirilmez.
 
 ## Sorun giderme
 
