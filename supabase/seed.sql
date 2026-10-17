@@ -1,0 +1,1 @@
+-- Source metadata is installed by migration 002. No fake jobs or schedules.

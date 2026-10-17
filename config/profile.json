@@ -1,0 +1,327 @@
+{
+  "version": "my-profile-v1",
+  "evidence": "TEMPLATE: replace with facts from your own CV before publishing to your database",
+  "location": "Turkey (example search region; customize)",
+  "education": {
+    "degree": null,
+    "expected_graduation": null
+  },
+  "experience": [],
+  "search_tracks": {
+    "backend": [
+      "backend developer",
+      "backend engineer"
+    ],
+    "software": [
+      "software developer",
+      "software engineer",
+      "graduate software engineer",
+      "junior software engineer"
+    ],
+    "fullstack": [
+      "full stack developer",
+      "full stack engineer",
+      "full-stack developer",
+      "full-stack engineer"
+    ],
+    "forward_deployed": [
+      "forward deployed engineer",
+      "forward deployed software engineer"
+    ],
+    "ai": [
+      "AI engineer",
+      "applied AI engineer",
+      "artificial intelligence engineer",
+      "machine learning engineer"
+    ],
+    "internship": [
+      "software engineering intern",
+      "backend developer intern",
+      "backend engineer intern",
+      "software developer intern",
+      "full stack intern",
+      "AI engineer intern",
+      "forward deployed engineer intern"
+    ]
+  },
+  "skills": [],
+  "preferences": {
+    "salary_floor": null,
+    "english_level": null,
+    "work_authorization_outside_turkey": "unknown",
+    "contractor_preference": "unknown",
+    "employment_priority": {
+      "primary": [
+        "full_time"
+      ],
+      "high": [
+        "internship"
+      ],
+      "secondary": [
+        "part_time",
+        "contract"
+      ]
+    },
+    "career_target": [
+      "junior",
+      "graduate",
+      "entry_level"
+    ],
+    "target_role_families": [
+      "forward_deployed",
+      "ai",
+      "fullstack",
+      "software",
+      "backend"
+    ],
+    "excluded_roles": []
+  },
+  "rules": [
+    "Unspecified preferences are unknown, not rejection criteria.",
+    "Europe/EMEA/remote does not prove hiring eligibility from Turkey.",
+    "Use experience and projects as evidence; do not invent years of employment.",
+    "Keep adjacent roles for exploration rather than filtering solely on junior in the title.",
+    "Junior/graduate full-time roles are the main target. Internships remain high priority, not a low-priority fallback.",
+    "Do not filter discovery by the CV skills list. Search broad role families across technology stacks.",
+    "An unlisted language or framework is not by itself a rejection or low-score reason. Assess the work, seniority and transferable experience.",
+    "Distinguish mandatory deep expertise from preferred skills; report genuine gaps without inventing experience.",
+    "The evaluator makes the final CV-fit decision from responsibilities and mandatory requirements. A seniority label alone is not a hard rejection."
+  ],
+  "search": {
+    "schema_version": 1,
+    "enabled": true,
+    "freshness_days": 7,
+    "internship_freshness_days": 30,
+    "experience_levels": [
+      "internship",
+      "entry_level",
+      "associate"
+    ],
+    "geographies": {
+      "istanbul": {
+        "label": "Istanbul, Türkiye",
+        "geo_id": "102424322",
+        "work_types": [
+          "on_site",
+          "remote",
+          "hybrid"
+        ],
+        "country": "TR",
+        "country_aliases": [
+          "Turkey",
+          "Türkiye",
+          "Turkiye"
+        ],
+        "quality_markers": [
+          "Istanbul",
+          "İstanbul",
+          "Turkey",
+          "Türkiye",
+          "Turkiye"
+        ],
+        "verified_at": "2026-10-15"
+      },
+      "turkey_remote": {
+        "label": "Türkiye",
+        "geo_id": "102105699",
+        "work_types": [
+          "remote"
+        ],
+        "country": "TR",
+        "country_aliases": [
+          "Turkey",
+          "Türkiye",
+          "Turkiye"
+        ],
+        "quality_markers": [
+          "Turkey",
+          "Türkiye",
+          "Turkiye",
+          "Istanbul",
+          "Ankara",
+          "EMEA",
+          "Europe",
+          "Worldwide",
+          "Anywhere"
+        ],
+        "verified_at": "2026-10-15"
+      },
+      "europe_remote": {
+        "label": "European Union",
+        "geo_id": "91000000",
+        "work_types": [
+          "remote"
+        ],
+        "country": "TR",
+        "country_aliases": [
+          "Turkey",
+          "Türkiye",
+          "Turkiye"
+        ],
+        "quality_markers": [],
+        "verified_at": "2026-10-15"
+      },
+      "emea_remote": {
+        "label": "EMEA",
+        "geo_id": "91000007",
+        "work_types": [
+          "remote"
+        ],
+        "country": "TR",
+        "country_aliases": [
+          "Turkey",
+          "Türkiye",
+          "Turkiye"
+        ],
+        "quality_markers": [],
+        "verified_at": "2026-10-15"
+      },
+      "worldwide_remote": {
+        "label": "Worldwide",
+        "geo_id": "92000000",
+        "work_types": [
+          "remote"
+        ],
+        "country": "TR",
+        "country_aliases": [
+          "Turkey",
+          "Türkiye",
+          "Turkiye"
+        ],
+        "quality_markers": [],
+        "verified_at": "2026-10-15"
+      }
+    },
+    "rotation": [
+      {
+        "track": "backend",
+        "lane": "turkey_remote"
+      },
+      {
+        "track": "fullstack",
+        "lane": "europe_remote"
+      },
+      {
+        "track": "software",
+        "lane": "istanbul"
+      },
+      {
+        "track": "forward_deployed",
+        "lane": "emea_remote"
+      },
+      {
+        "track": "ai",
+        "lane": "worldwide_remote"
+      },
+      {
+        "track": "software",
+        "lane": "turkey_remote"
+      },
+      {
+        "track": "backend",
+        "lane": "europe_remote"
+      },
+      {
+        "track": "fullstack",
+        "lane": "istanbul"
+      },
+      {
+        "track": "ai",
+        "lane": "emea_remote"
+      },
+      {
+        "track": "forward_deployed",
+        "lane": "worldwide_remote"
+      }
+    ],
+    "filters": {
+      "seniority_handling": "model_review",
+      "title_terms": [
+        "software",
+        "developer",
+        "engineer",
+        "programmer",
+        "scientist",
+        "research",
+        "automation",
+        "yazılım"
+      ],
+      "excluded_title_terms": [
+        "sales development",
+        "business development",
+        "project manager",
+        "product manager",
+        "sales engineer",
+        "civil engineer",
+        "mechanical engineer",
+        "electrical engineer",
+        "chemical engineer",
+        "manufacturing engineer",
+        "service desk",
+        "support engineer"
+      ],
+      "excluded_seniority_terms": [
+        "senior",
+        "staff",
+        "principal",
+        "director",
+        "head of",
+        "technical lead",
+        "engineering manager"
+      ],
+      "early_career_terms": [
+        "junior",
+        "graduate",
+        "intern",
+        "entry level",
+        "entry-level",
+        "staj",
+        "new grad"
+      ],
+      "keep_unknown_fields": true
+    },
+    "sources": {
+      "apify_bebity": {
+        "enabled": true,
+        "primary_queries": 2,
+        "internship_queries": 1,
+        "results_per_query": 6
+      },
+      "himalayas": {
+        "enabled": true,
+        "primary_queries": 1,
+        "internship_queries": 1,
+        "pages_per_query": 1,
+        "results_per_page": 20,
+        "sort": "recent"
+      },
+      "remotive": {
+        "enabled": true,
+        "category": "software-dev",
+        "result_limit": 100
+      },
+      "wwr": {
+        "enabled": true,
+        "item_limit": 400
+      }
+    }
+  },
+  "matching_policy": {
+    "skills_usage": "CV evidence and transferable experience; never a discovery allowlist",
+    "required_skills": [],
+    "allow_unlisted_technologies": true,
+    "assess_role_responsibilities_and_seniority_first": true,
+    "distinguish_mandatory_requirements_from_preferences": true,
+    "missing_preferred_skill_is_rejection": false,
+    "decision_basis": "Responsibilities, mandatory requirements and CV evidence before title labels or keyword overlap",
+    "seniority_usage": "Early-career discovery bias; verify actual required experience and ownership before judging fit",
+    "evidence_limits": "Internship, research and personal/product projects are distinct evidence; never convert them into invented professional years or production scale",
+    "role_guidance": {
+      "forward_deployed": "Compare the actual responsibilities and mandatory requirements with verified evidence in the live candidate profile. Report missing evidence as unknown.",
+      "ai": "Compare the actual responsibilities and mandatory requirements with verified evidence in the live candidate profile. Report missing evidence as unknown.",
+      "fullstack": "Compare the actual responsibilities and mandatory requirements with verified evidence in the live candidate profile. Report missing evidence as unknown.",
+      "software": "Compare the actual responsibilities and mandatory requirements with verified evidence in the live candidate profile. Report missing evidence as unknown.",
+      "backend": "Compare the actual responsibilities and mandatory requirements with verified evidence in the live candidate profile. Report missing evidence as unknown."
+    }
+  }
+}

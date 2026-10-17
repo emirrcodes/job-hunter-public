@@ -1,0 +1,123 @@
+{
+  "schedule": {
+    "timezone": "Europe/Istanbul",
+    "collection_runs_per_day": 2,
+    "collection_times": [
+      "07:00",
+      "19:00"
+    ],
+    "evaluation_runs_per_day": 1,
+    "evaluation_time": null,
+    "collection_enabled": false,
+    "evaluation_enabled": false,
+    "note": "Template only; no schedules exist until setup and a successful pilot."
+  },
+  "spending": {
+    "mode": "trial_only",
+    "paid_collection_enabled": false,
+    "monthly_paid_limit_usd": 0,
+    "trial_verified": false,
+    "verified_at": null,
+    "apify_free_credit_usd": 5,
+    "apify_account_max_usage_usd": 5,
+    "max_charge_per_run_usd": 0.05,
+    "rolling_31_day_reservation_limit_usd": 3.5
+  },
+  "linkedin_selection": {
+    "primary": "apify_bebity",
+    "benchmark_candidates": [
+      "apify_bebity",
+      "brightdata"
+    ],
+    "sample_limit_per_candidate": 20,
+    "note": "Verify your own Apify plan and limits; no provider fallback."
+  },
+  "sources": [
+    {
+      "id": "himalayas",
+      "method": "public_json",
+      "stage": "active",
+      "endpoint": "https://himalayas.app/jobs/api/search",
+      "key_required": false,
+      "attribution_required": true,
+      "min_interval_hours": 12,
+      "enabled": true
+    },
+    {
+      "id": "remotive",
+      "method": "public_json",
+      "stage": "active",
+      "endpoint": "https://remotive.com/api/remote-jobs",
+      "key_required": false,
+      "attribution_required": true,
+      "min_interval_hours": 12,
+      "note": "Public API listings are delayed 24h; do not exceed provider guidance of 4 requests/day.",
+      "enabled": true
+    },
+    {
+      "id": "wwr",
+      "method": "rss",
+      "stage": "active",
+      "endpoint": "https://weworkremotely.com/remote-jobs.rss",
+      "key_required": false,
+      "attribution_required": true,
+      "min_interval_hours": 12,
+      "enabled": true
+    },
+    {
+      "id": "apify_bebity",
+      "method": "async_actor",
+      "stage": "active",
+      "actor": "bebity/linkedin-jobs-scraper",
+      "key_required": true,
+      "secret_name": "APIFY_TOKEN",
+      "enabled": true
+    },
+    {
+      "id": "brightdata",
+      "method": "async_discovery",
+      "stage": "benchmark_pending",
+      "dataset": "gd_lpfll7v5hcqtkxl6l",
+      "key_required": true,
+      "secret_name": "BRIGHTDATA_API_TOKEN",
+      "enabled": false
+    },
+    {
+      "id": "greenhouse",
+      "method": "company_board_json",
+      "stage": "planned",
+      "companies": [],
+      "key_required": false
+    },
+    {
+      "id": "lever",
+      "method": "company_board_json",
+      "stage": "planned",
+      "companies": [],
+      "key_required": false
+    },
+    {
+      "id": "ashby",
+      "method": "company_board_json",
+      "stage": "planned",
+      "companies": [],
+      "key_required": false
+    },
+    {
+      "id": "wellfound",
+      "method": "actor_candidate",
+      "stage": "research",
+      "actor_candidate": "radeance/wellfound-job-listings-scraper",
+      "enabled": false,
+      "note": "Needs input-schema, account requirement and live quality validation. Do not use the under-maintenance scrapeengine actor."
+    },
+    {
+      "id": "eu_remote_jobs",
+      "method": "undecided",
+      "stage": "research",
+      "url": "https://euremotejobs.com/jobs/",
+      "enabled": false,
+      "note": "Turkey/EMEA/Worldwide filters verified; automated ingestion method not verified."
+    }
+  ]
+}

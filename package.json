@@ -1,0 +1,44 @@
+{
+  "name": "job-hunter-public",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "plan": "node scripts/plan.mjs",
+    "check": "node --check src/normalize.mjs && node --check scripts/plan.mjs && node --check scripts/db.mjs && node --test tests/*.test.mjs",
+    "db:whoami": "node scripts/db.mjs whoami",
+    "db:plan": "node scripts/db.mjs migrate --dry-run",
+    "db:migrate": "node scripts/db.mjs migrate",
+    "db:grant-roles": "node scripts/db.mjs grant-roles",
+    "db:pending": "node scripts/db.mjs pending",
+    "db:shortlist": "node scripts/db.mjs shortlist",
+    "db:test": "python3 scripts/test-database.py",
+    "radar": "node scripts/radar.mjs",
+    "access:check": "node scripts/check-access.mjs",
+    "gateway:smoke": "node scripts/smoke.mjs",
+    "cloud:package": "node scripts/cloud-package.mjs",
+    "schedule:status": "node scripts/schedule.mjs status",
+    "schedule:off": "node scripts/schedule.mjs off",
+    "profile:check": "node scripts/profile.mjs check",
+    "profile:push": "node scripts/profile.mjs push",
+    "profile:status": "node scripts/profile.mjs status",
+    "setup:init": "node scripts/init.mjs",
+    "setup:provision": "node scripts/provision.mjs",
+    "setup:deploy": "node scripts/deploy.mjs",
+    "pilot:enable": "node scripts/enable-pilot.mjs",
+    "release:check": "node scripts/release-check.mjs"
+  },
+  "dependencies": {
+    "fast-xml-parser": "5.11.2"
+  },
+  "license": "MIT",
+  "description": "Self-hosted job radar with Supabase, Apify and your own AI agent",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/emirrcodes/job-hunter-public.git"
+  }
+}
