@@ -1,5 +1,9 @@
 # Kendi hesabınızla sıfırdan kurulum
 
+GitHub'daki **Use this template → Create a new repository** seçeneğiyle kendi
+private reponuzu oluşturabilirsiniz. Bu durumda aşağıdaki clone komutunda kendi
+repo adresinizi kullanın. Public fork'a kişisel CV/ayar göndermeyin.
+
 Her kullanıcı için ayrı Supabase projesi ve Apify hesabı kullanın. İş ilanları, profil
 ve değerlendirmeler o kişinin projesinde kalır. Public repo yalnızca kod ve örnek ayar içerir.
 

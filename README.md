@@ -11,7 +11,8 @@ Sonuçları terminalden veya ajanınıza sorarak okuyabilirsiniz.
 
 ## Başlamak
 
-1. Bu repoyu fork edin veya klonlayın. Kişisel profilinizi kendi private kopyanızda tutun.
+1. GitHub'da **Use this template → Create a new repository** ile kendi private
+   reponuzu oluşturun veya bu repoyu klonlayın. Kişisel profilinizi private tutun.
 2. [Sıfırdan kurulum rehberini](docs/SETUP.md) izleyin: kendi Supabase projeniz ve Apify
    API token'ınız gerekir. Node 22+, npm, Supabase CLI ve PostgreSQL `psql` kullanılır.
 3. `config/profile.json` içindeki örnek arama ayarlarını ve boş CV alanlarını kendinize göre doldurun.
