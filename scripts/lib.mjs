@@ -35,3 +35,17 @@ export function projectTarget(env=process.env) {
   if (env.SUPABASE_URL !== expected) throw new Error('SUPABASE_URL must match SUPABASE_PROJECT_REF exactly');
   return {ref,url:expected};
 }
+
+export function gatewayTarget(env=process.env) {
+  if (env.SUPABASE_PROJECT_REF) return projectTarget(env).url;
+  if (!/^https:\/\/[a-z]{20}\.supabase\.co$/.test(env.SUPABASE_URL ?? '')) {
+    throw new Error('Set SUPABASE_URL to your project’s https://<project-ref>.supabase.co origin');
+  }
+  return env.SUPABASE_URL;
+}
+
+export function isProjectDatabase(url, ref) {
+  if ((url.port || '5432') !== '5432') return false;
+  return url.hostname === `db.${ref}.supabase.co`
+    || (url.hostname.endsWith('.pooler.supabase.com') && decodeURIComponent(url.username).endsWith(`.${ref}`));
+}

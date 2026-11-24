@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
 import {XMLParser} from 'fast-xml-parser';
 import {normalize,batch,wwrItems} from '../src/adapters.mjs';
 test('Himalayas epoch seconds and explicit restrictions survive normalization',()=>{
@@ -14,10 +15,13 @@ test('WWR region is provenance, not proof that conflicting description allows Tu
   assert.equal(job.country_restrictions,null); assert.match(job.description,/Canada/);
   assert.throws(()=>wwrItems('<!DOCTYPE rss><rss/>',XMLParser));
 });
-test('relevance gate retains senior adjacent roles and records malformed results',()=>{
+test('public feed filtering uses the candidate profile and records malformed results',()=>{
+  const profile=JSON.parse(readFileSync(new URL('../config/profile.example.json',import.meta.url)));
   const data=batch('remotive',[
-    {title:'Senior Backend Engineer',company_name:'Example',url:'https://example.com/1'},
-    {title:'Mobile Developer'}, {title:'Sales Manager'},
-  ]);
+    {title:'Senior Customer Support Specialist',company_name:'Example',url:'https://example.com/1'},
+    {title:'Customer Support Specialist'},
+    {title:'Fictional Payroll Coordinator',company_name:'Example',url:'https://example.com/2'},
+  ], {profile});
   assert.equal(data.items.length,1); assert.equal(data.metrics.invalid,1); assert.equal(data.metrics.irrelevant,1);
+  assert.equal(data.metrics.filtered_by_reason.unrelated_role,1);
 });

@@ -2,6 +2,7 @@ import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
+import { isProjectDatabase, projectTarget } from './lib.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 if (existsSync(`${root}.env.local`)) process.loadEnvFile(`${root}.env.local`);
@@ -26,6 +27,10 @@ if (!process.env[variable]) { console.error(`Missing ${variable}. Save it in ign
 let url;
 try { url = new URL(process.env[variable]); } catch { console.error('Invalid PostgreSQL connection URL'); process.exit(1); }
 if (!['postgres:', 'postgresql:'].includes(url.protocol)) { console.error('PostgreSQL connection URL required'); process.exit(1); }
+const disposableTest = process.env.RADAR_DB_TEST === '1' && url.hostname === 'localhost' && url.port === '55461';
+if (!disposableTest && !isProjectDatabase(url, projectTarget().ref)) {
+  throw new Error('Database URL must match your project ref, using Direct or Session pooler on 5432');
+}
 const sslmode = url.searchParams.get('sslmode') || 'require';
 if (!['require','verify-ca','verify-full'].includes(sslmode)) { console.error('TLS is required for the cloud database'); process.exit(1); }
 if ([...url.searchParams.keys()].some(k=>!['sslmode','sslrootcert','application_name'].includes(k))) {
@@ -36,6 +41,8 @@ const env = {...process.env,
   PGPASSWORD:process.env[passwordVariable] || decodeURIComponent(url.password), PGDATABASE:decodeURIComponent(url.pathname.slice(1)) || 'postgres',
   PGSSLMODE:sslmode, PGCONNECT_TIMEOUT:'15', PGAPPNAME:'job-hunter',
 };
+delete env.PGHOSTADDR;
+delete env.PGSERVICE;
 if (url.searchParams.has('sslrootcert')) env.PGSSLROOTCERT = url.searchParams.get('sslrootcert');
 let sql;
 if (command === 'whoami') sql = 'select current_user, current_database(), version();';

@@ -1,0 +1,37 @@
+{
+  "version": "example-customer-support-v1",
+  "experience": ["Handled customer requests in a fictional ticket queue and wrote help center articles."],
+  "skills": ["Customer communication", "Ticket triage"],
+  "preferences": {
+    "work_country_aliases": ["US", "USA", "United States", "United States of America"],
+    "languages": ["English"],
+    "report_language": "English",
+    "timezone": "UTC",
+    "notes": []
+  },
+  "search_tracks": {
+    "customer_support": ["customer support specialist", "customer service representative"]
+  },
+  "search": {
+    "schema_version": 2,
+    "enabled": true,
+    "freshness_days": 14,
+    "employment_types": ["part_time", "contract"],
+    "experience_levels": [],
+    "geographies": {
+      "home_remote": { "label": "United States", "country": "US", "work_types": ["remote"], "geo_id": "", "verified_at": "", "quality_markers": [] }
+    },
+    "rotation": [{ "track": "customer_support", "lane": "home_remote" }],
+    "filters": {
+      "title_terms": ["customer support", "customer service", "client support"],
+      "excluded_title_terms": [],
+      "excluded_seniority_terms": []
+    },
+    "sources": {
+      "apify_bebity": { "enabled": false, "queries": 2, "results_per_query": 6 },
+      "himalayas": { "enabled": true, "pages_per_query": 1, "sort": "recent" },
+      "remotive": { "enabled": true, "category": "", "result_limit": 100 },
+      "wwr": { "enabled": false, "item_limit": 400 }
+    }
+  }
+}

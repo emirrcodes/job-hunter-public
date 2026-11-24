@@ -1,24 +1,10 @@
-# Kendi hesabınızla sıfırdan kurulum
+# Set up Job Hunter with your own accounts
 
-GitHub'daki **Use this template → Create a new repository** seçeneğiyle kendi
-private reponuzu oluşturabilirsiniz. Bu durumda aşağıdaki clone komutunda kendi
-repo adresinizi kullanın. Public fork'a kişisel CV/ayar göndermeyin.
+Give this guide and [the setup prompt](../prompts/setup.md) to a coding agent that can edit a repo and use a terminal. It can run the commands while you enter credentials privately and choose a search.
 
-Her kullanıcı için ayrı Supabase projesi ve Apify hesabı kullanın. İş ilanları, profil
-ve değerlendirmeler o kişinin projesinde kalır. Public repo yalnızca kod ve örnek ayar içerir.
+## 1. Clone and initialize
 
-## 1. Gerekenler
-
-- Node.js 22+ ve npm (`node --version`).
-- Supabase CLI (`supabase --version`), deploy script'i bunu kullanır.
-- PostgreSQL `psql` istemcisi (`psql --version`). `db:test` için ayrıca `initdb` ve `pg_ctl` gerekir.
-- Kendi Supabase hesabınızda **yeni, boş bir proje**; DB parolasını özel olarak saklayın.
-- Kendi Apify hesabınız ve API token'ınız. Kod FREE/5 USD plan bilgisini ve en fazla
-  5 USD hesap kullanım tavanını kabul eder; hesabınız bu koşulları karşılamıyorsa
-  ücretli plana geçmeyin veya kontrolleri kaldırmayın. LinkedIn adımı atlanır.
-- İleride değerlendirmek için terminal ve HTTPS erişimi olan bir AI ajanı.
-
-Kurulum hesabı açmayı veya ödeme planını değiştirmeyi otomatik yapmaz.
+Install Git, Node.js 22+, npm, Supabase CLI and PostgreSQL `psql`. `npm run db:test` also needs Python 3 and local PostgreSQL server tools. Create an empty Supabase project in your own account. Create or use your own Apify account if you want LinkedIn collection.
 
 ```sh
 git clone https://github.com/emirrcodes/job-hunter-public.git
@@ -27,176 +13,91 @@ npm ci
 npm run setup:init
 ```
 
-`setup:init`, `.env.example` dosyasından `.env.local` oluşturur, dosya iznini 0600
-yapar ve üç ayrı scope token'ı üretir. Tekrar çalışınca mevcut değerleri korur.
-Bu noktada hiçbir bulut isteği yapılmaz.
+Initialization creates `.env.local` with three distinct gateway tokens and `local/profile.json` from the fictional example. It preserves existing values and makes no provider calls.
 
-## 2. Gizli ayarları doldurun
+## 2. Replace the sample with your search
 
-`.env.local` dosyasını özel bir editörde açın. Değerleri sohbete, Git'e veya shell
-geçmişine yazmayın. Dosyadaki şu alanları **kendi** hesabınızdan doldurun:
+Ask the user for these inputs before publishing a profile.
 
-| Alan | Nereden / neden |
-|---|---|
-| SUPABASE_PROJECT_REF | Yeni projenizin referansı (20 küçük harf) |
-| SUPABASE_URL | Tam olarak `https://<kendi-project-ref>.supabase.co` |
-| SUPABASE_ACCESS_TOKEN | Projeye erişen hesabın personal access token'ı; yönetim/deploy |
-| RADAR_MIGRATION_DATABASE_URL | Dashboard → Connect → Direct veya Session pooler bağlantısı; parola hariç |
-| RADAR_MIGRATION_DATABASE_PASSWORD | Yeni projenizin DB parolası; URL'den ayrı tutulabilir |
-| APIFY_TOKEN | Apify Console → API token |
-| RADAR_COLLECTOR_TOKEN / EVALUATOR_TOKEN / READER_TOKEN | `setup:init` oluşturdu; değiştirmek gerekmez |
+- Target job titles in the languages employers use, plus adjacent roles and exclusions.
+- Target city, country, work arrangements and the countries where the user can actually work. Ask about visa sponsorship and relocation where relevant.
+- Employment types, desired seniority, freshness, language, salary or other constraints. Leave unknown preferences blank.
+- Candidate evidence from a redacted CV or short factual summary. Ask which credentials, results and skills they want the evaluator to consider.
+- Which sources they want to use and whether to include LinkedIn via Apify. Ask about scheduling once the manual workflow works.
 
-İlk kurulumda migration bağlantısı yeni projenizin `postgres` sahibi olabilir; bu
-hesap değerlendirici ajana verilmez. Örnek URL biçimleri, gerçek host'u Dashboard'dan kopyalayın:
-
-```text
-postgresql://postgres@db.<project-ref>.supabase.co:5432/postgres?sslmode=require
-postgresql://postgres.<project-ref>@<dashboard-session-pooler-host>:5432/postgres?sslmode=require
-```
-
-IPv4 ağı kullanıyorsanız Session pooler seçin; transaction pooler (6543) migration
-runner için uygun değildir. Bölge adından host üretmeyin. Ayrıntı:
-[Supabase bağlantı rehberi](https://supabase.com/docs/guides/database/connecting-to-postgres).
-CLI'ın global hesabını değiştirmek gerekmez; deploy ortamınızdaki access token kullanılır.
-
-`RADAR_*_TOKEN` Supabase anon/service_role anahtarı değildir. Edge Function DB erişimi
-kendi Supabase runtime'ındaki service_role sırrını kullanır; onu ajanınıza vermeyin.
-
-## 3. CV ve arama profilinizi hazırlayın
-
-`config/profile.json` örneği Türkiye'den junior/graduate yazılım işleri ve stajlar
-arar; CV alanları boştur. Kendi konumunuzu, eğitiminizi, mezuniyet tarihinizi,
-deneyim/projelerinizi, becerilerinizi ve tercihlerinizi yazın. Bilinmeyeni `null`,
-`unknown` veya boş dizi bırakın. `version` için kendi sürüm adınızı kullanın.
-
-`search_tracks`, `search.rotation`, `search.filters` ve `search.geographies` alanlarını
-birlikte düşünün. Konumu değiştirirken LinkedIn geoId'sini doğrulayın ve API ülke
-kodunu güncelleyin; serbest konum metni fallback'i yoktur. Örnek rotasyon ülke/EMEA
-hatları içerir, bu bölgelerin tamamı çalışma izniniz olduğu anlamına gelmez.
-Mevcut doğrulayıcı tam zamanlı ana hedef + yüksek öncelikli staj araması gerektirir.
-[Profil rehberinde](SEARCH_PROFILE.md) alanlar ve sınırlar açıklanır.
-
-Kişisel CV dosyanızı `local/` altında tutun. Özelleştirilmiş `config/profile.json`
-kişisel veri içerir: public fork'a göndermeyin; değişiklikleri yerelde veya private repoda saklayın.
+Replace `version`, candidate evidence, preferences, `search_tracks`, `rotation`, geographies and title filters in `local/profile.json`. Use the [profile reference](SEARCH_PROFILE.md) to choose settings. Enable only sources that serve your intended locations and work arrangements. Keep LinkedIn disabled until you have verified its location ID and cost. `npm run profile:push` refuses the untouched example version. Profiles from older kit releases can still be read. If upgrading from schema v1, back up your personalized `config/profile.json` before pulling this update. Use that copy to fill `local/profile.json` after running `setup:init`, then publish the revised profile.
 
 ```sh
-npm test
+npm run check
 npm run profile:check
 npm run plan -- --slot 0
 npm run db:plan
 ```
 
-`plan` ve `db:plan` ağ çağrısı yapmaz. Çıkan arama kelimelerini/konumları inceleyin.
+Preview at least one slot per rotation entry when there are multiple entries. Confirm the actual keywords, country, work arrangement, employment types and sources with the user. A local preview makes no provider requests. A plan with no enabled source cannot collect anything for that slot.
 
-## 4. Kendi Supabase projenize kurun
+## 3. Enter private settings
 
-Aşağıdaki adımlar projenize rol, şema, fonksiyon ve secret yazar; scrape başlatmaz.
-Hedefi `.env.local` içinden kendi yeni projeniz olarak doğrulayın.
+Open `.env.local` in a private editor. Use values from your own project and keep secrets out of chat, source control, command arguments and shell history.
+
+| Variable | Value to enter |
+|---|---|
+| `SUPABASE_PROJECT_REF` | The 20-letter reference from your Supabase project |
+| `SUPABASE_URL` | `https://<your-project-ref>.supabase.co` |
+| `SUPABASE_ACCESS_TOKEN` | A personal access token for the account that owns the project, used by admin scripts and deployment |
+| `RADAR_MIGRATION_DATABASE_URL` | The real Direct or Session pooler connection string from **Connect** in the dashboard |
+| `RADAR_MIGRATION_DATABASE_PASSWORD` | The DB password if you keep it separate from the URL |
+| `APIFY_TOKEN` | Your Apify API token if you enable LinkedIn, otherwise leave blank |
+| `RADAR_COLLECTOR_TOKEN`, `RADAR_EVALUATOR_TOKEN`, `RADAR_READER_TOKEN` | Already generated by `setup:init` |
+
+Use the connection details shown for your own project. For IPv4-only networks, use the Session pooler. Use TLS and port 5432. The initial connection can use the owner of the empty project. Keep it away from the reviewer agent. [Supabase database connection guide](https://supabase.com/docs/guides/database/connecting-to-postgres).
+
+## 4. Deploy to the selected project
+
+Verify the project reference, URL and database target before running these writes. The scripts use the access token in your local environment and target the selected project explicitly.
 
 ```sh
 npm run access:check
-npm run setup:provision
 npm run db:whoami -- --role migration
+npm run setup:provision
 npm run db:migrate
 npm run db:grant-roles
 npm run profile:push
 npm run setup:deploy
 npm run profile:status
 npm run gateway:smoke
-npm run radar -- status
-npm run radar -- profile
 npm run radar -- search_plan --slot 0
 ```
 
-`access:check` yalnızca hesap/plan/actor durumunu okur, sonuçları Git dışındaki
-`local/access-report.json` içine yazar. HTTP hata kodlarını kontrol edin.
-`setup:provision` iki NOLOGIN runtime rolü oluşturur; HTTP ajanı için DB parolası gerekmez.
-Migration runner advisory lock ve checksum ledger kullanır. Uygulanmış dosyaları
-sonradan değiştirmeyin; Supabase CLI migration ledger'ıyla karıştırmayın.
+`access:check` performs read-only account checks and stores a report under `local/`. `db:migrate` uses its own checksum ledger, so use this same command for upgrades and keep already applied migration files intact. `setup:deploy` sends scoped runtime tokens, plus the optional Apify token, to Supabase Secrets. The Edge Function checks each request’s token against an action allowlist. `gateway:smoke` checks expected 401/403 and successful read responses and makes no collection run. [Supabase Edge Function secrets](https://supabase.com/docs/guides/functions/secrets).
 
-`setup:deploy` Apify ve üç scope secret'ını yalnızca seçtiğiniz projeye yükler ve
-`job-radar` Edge Function'ını deploy eder. Platform JWT kontrolü kapalıdır, fonksiyon
-kendi scope token'larını doğrular. Anahtarsız istek 401, yanlış kapsam 403 dönmelidir.
-Bu kontrol `gateway:smoke` içinde yapılır; gerçek ilan toplamaz.
+## 5. Verify one real collection and review
 
-## 5. Tek gerçek pilot
-
-Bu adım Apify kredisi tüketebilir (run üst sınırı 0,05 USD). Kaynaklar ve collection
-başlangıçta kapalıdır. Aşağıdaki işlemden sonra manuel çağrı yapılabilir; Cron henüz yoktur.
+If LinkedIn is enabled, check the current Apify plan, monthly usage limit and [Actor pricing](https://apify.com/bebity/linkedin-jobs-scraper/pricing), then confirm the pilot with the user. The collector checks for the configured FREE plan and credit limit before every start. It reserves up to USD 0.05 per run and USD 3.50 over 31 days. If the price or account conditions are unsuitable, disable `search.sources.apify_bebity.enabled` and publish the revised profile. There is no automatic paid fallback.
 
 ```sh
 npm run pilot:enable
 npm run radar -- collect
 npm run radar -- status
-# LinkedIn running ise actor bitince:
+# If Apify returned a running job, wait for that run to finish and retrieve it.
 npm run radar -- poll
 npm run radar -- status
 ```
 
-`collect` birden fazla kaynaktan toplar; HTTP 200 tek başına hepsinin başarılı olduğu
-anlamına gelmez. Sonuçtaki her kaynak durumunu okuyun. LinkedIn asenkrondur;
-`poll` yalnızca mevcut run'ı alır. `unknown` başlangıç varsa yeni scrape başlatmayın;
-Apify Console'daki gerçek run ile uzlaştırın. Plan/kredi doğrulanmazsa LinkedIn atlanır.
+Read each source’s status separately. The same collection slot is idempotent. If an Apify start is ambiguous, check the existing run in Apify Console before attempting another. If the sources return zero candidates, report zero candidates and check the keywords, freshness and source coverage with the user.
 
-Aynı 12 saatlik slotta tekrar collect yeni çalışma açmaz. Başarısız pilotu yeniden
-başlatmak için yapay slotlar veya bütçe kontrollerini aşan müdahaleler kullanmayın.
-Kaynak sonucu yoksa/bozuksa bunu açıkça raporlayın. Sahte ilan/değerlendirme üretmeyin.
-
-## 6. Kendi ajanınızı bağlayın
-
-Kurulum yapan ajan için `prompts/setup.md`; yalnızca değerlendirme yapacak ajan için
-`prompts/cloud-setup.md` ve `prompts/review.md` dosyalarını kullanın.
-Değerlendiriciye sadece **SUPABASE_URL + RADAR_EVALUATOR_TOKEN** verin.
-Ajanın shell/Node ve HTTPS erişimi olmalıdır; gateway doğrudan MCP sunucusu değildir.
+Give the review agent only the Supabase URL and `RADAR_EVALUATOR_TOKEN` via its secret store. It needs the client scripts, Node.js and HTTPS access to that project. Follow the [review prompt](../prompts/review.md) and the [evaluation JSON contract](CLOUD.md). Claim one available listing, save a real evidence-based evaluation and verify it appears in the shortlist.
 
 ```sh
-mkdir -p local
-node scripts/radar.mjs status
 node scripts/radar.mjs profile
 node scripts/radar.mjs claim --limit 1 --out local/claims.json
-# Ajan tam ilanı ve canlı profili okuyup local/evaluations.json oluşturur.
+# The agent writes local/evaluations.json from the real claim and live profile.
 node scripts/save-evaluations.mjs local/claims.json local/evaluations.json
 node scripts/radar.mjs shortlist
 ```
 
-`claim` gerçek işi 20 dakika sahiplenir; sıradan listeleme için kullanmayın.
-JSON değerlendirme örneği/sözleşmesi [bulut rehberindedir](CLOUD.md).
-Bekleyen iş yoksa yazma testi doğrulanmış sayılmaz.
+A claim reserves work for 20 minutes. Use `status` or `shortlist` for read-only checks. With an empty queue, report the review round trip as pending. The system does not need a synthetic record in a live project to pass a smoke test.
 
-## 7. İsteğe bağlı toplama zamanlaması
+## 6. Schedule collection if requested
 
-Dört kaynağın her biri **en az bir kabul edilmiş ilanla** başarılı/kısmi pilotu
-bitirmeden schedule script'i Cron kurmaz. Kaynak boşsa veya LinkedIn atlandıysa
-bu koşulu gizlemeyin. Önce kaynağın erişimini/profili inceleyin.
-
-```sh
-node scripts/schedule.mjs on
-npm run schedule:status
-# Kurulmuş zamanlamayı durdurmak için:
-npm run schedule:off
-```
-
-Cron 04.00/16.00 UTC = 07.00/19.00 Türkiye saati çalışır. Ayrı 5 dakikalık poll
-görevi sadece mevcut LinkedIn run'ı varsa gateway'i çağırır. Vault secret'ları
-script tarafından oluşturulur. `schedule:status` kurulumdan önce pg_cron yoksa hata verebilir.
-Başka saat dilimi isterseniz `supabase/setup/schedule.sql` ve ilgili belgeleri güncelleyin.
-
-**AI değerlendirmesi yalnızca kullanıcı istediğinde yapılır.** Günlük otomatik
-ajan kontrolü iptal edilmiştir; ajan zamanlaması veya onun yerine yerel otomasyon
-kurmayın. Yukarıdaki Cron yalnızca ilan toplar. Ek model API maliyeti veya bulut
-aboneliği otomatik etkinleştirilmez.
-
-## Sorun giderme
-
-- `Unexpected/mismatched project`: ref ve URL aynı kendi projenize ait olmalı; boş placeholder bırakmayın.
-- `psql` bulunamadı: PostgreSQL istemcisini kurup PATH'e ekleyin.
-- `initdb` yok: DB testleri için PostgreSQL server araçlarını kurun; gerekirse `PGBIN` verin.
-- DB bağlantısı yok: Dashboard host/username değerlerini ve ağınıza uygun Direct/Session seçimini kontrol edin.
-- 401/403: doğru scope token'ı kullanın; tüm token'ları aynı yapmayın. Deploy'daki secret ile eşleşmeli.
-- `free_budget_not_verified`: hesabınız kodun FREE/kredi/limit koşullarını karşılamıyor; ücretli fallback yok.
-- `All four sources...`: schedule öncesi gerçek pilot sonuçları yetersiz; başarılıymış gibi değiştirmeyin.
-- Gateway `request_failed`: deployment/migration/profil sırasını ve Supabase Function loglarını anahtarsız inceleyin.
-
-Resmî referanslar: [Edge Function deploy](https://supabase.com/docs/guides/functions/deploy),
-[Function secrets](https://supabase.com/docs/guides/functions/secrets),
-[Apify kullanım](https://docs.apify.com/account/billing).
+After a pilot accepts at least one listing from an enabled source, you can run `node scripts/schedule.mjs on`. The default collection times are 04:00 and 16:00 UTC. `npm run schedule:status` shows the jobs and `npm run schedule:off` pauses them and disables collection. The separate poll checks an existing Apify run every five minutes. Ask the user which times they want before changing the schedule SQL. Maintain the provider cooldown and the collection slot boundaries when customizing it. The evaluator runs on demand. [Supabase Cron and Vault](https://supabase.com/docs/guides/functions/schedule-functions).

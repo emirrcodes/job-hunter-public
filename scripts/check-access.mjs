@@ -18,6 +18,7 @@ const specs = [
 await mkdir(new URL('../local/',import.meta.url),{recursive:true});
 const report = {};
 for (const [key,url,token] of specs) {
+  if (key.startsWith('apify_') && !process.env.APIFY_TOKEN) continue;
   try {
     const result = await get(url,token);
     if (result.data) {

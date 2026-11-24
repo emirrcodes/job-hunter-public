@@ -1,10 +1,11 @@
 import {XMLParser} from 'npm:fast-xml-parser@5.11.2';
 import {batch,wwrItems} from '../_shared/adapters.mjs';
-import {collectionPlan,validateProfile} from '../_shared/search-profile.mjs';
+import {collectionPlan,collectionSlot,sourceIds,validateProfile} from '../_shared/search-profile.mjs';
 import {verifyLinkedinResults} from '../_shared/linkedin.mjs';
 
 const base=Deno.env.get('SUPABASE_URL')!;
-const key=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+const key=(JSON.parse(Deno.env.get('SUPABASE_SECRET_KEYS') || '{}').default as string | undefined)
+  || Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const apifyToken=Deno.env.get('APIFY_TOKEN')!;
 const actions:Record<string,string[]>={
   collector:['collect','poll'],
@@ -25,7 +26,8 @@ async function request(url:string,init:RequestInit={},timeout=25000) {
 }
 async function db(path:string,body?:unknown,method?:string) {
   const result=await request(`${base}/rest/v1/${path}`,{method:method||(body===undefined?'GET':'POST'),
-    headers:{apikey:key,Authorization:`Bearer ${key}`,'Content-Type':'application/json',Prefer:'return=representation'},
+    headers:{apikey:key,...(!key.startsWith('sb_secret_')?{Authorization:`Bearer ${key}`} : {}),
+      'Content-Type':'application/json',Prefer:'return=representation'},
     ...(body===undefined?{}:{body:JSON.stringify(body)})});
   return result?JSON.parse(result):null;
 }
@@ -40,18 +42,20 @@ async function fail(id:string,code:string,state='failed') {
   return {id,state,error:code};
 }
 async function publicCollect(source:string,profile:any) {
-  if(!profile.search.enabled||!profile.search.sources[source]?.enabled) return {source,skip:'profile_source_disabled'};
+  const preview=collectionPlan(profile,collectionSlot(),source);
+  if(!preview.enabled) return {source,skip:'reason' in preview ? preview.reason : 'profile_source_disabled'};
   const reserved=await rpc('radar_reserve_collection',{p_source:source,p_reserve:0});
   if(!reserved.run) return {source,...reserved};
   const id=reserved.run.id;
   try {
     const plan=collectionPlan(profile,reserved.slot,source);
+    if(!plan.enabled||!('urls' in plan)) return {source,...await fail(id,'collection_lane_changed')};
     await db(`radar_collection_runs?id=eq.${id}`,{metrics:{profile_revision:profile.revision,search_plan:plan}},'PATCH');
     let records:any[]=[]; const totals=[];
     const responses=await Promise.allSettled(plan.urls.map((url:string)=>request(url)));
     for(const response of responses) {
       if(response.status==='rejected') throw new Error('provider_request_failed');
-      if(source==='wwr') records.push(...wwrItems(response.value,XMLParser));
+      if(source==='wwr') records.push(...wwrItems(response.value,XMLParser).slice(0,plan.max_results));
       else {
         const data=JSON.parse(response.value);
         if(!Array.isArray(data.jobs)) throw new Error('provider_records_missing');
@@ -68,6 +72,7 @@ async function publicCollect(source:string,profile:any) {
 }
 async function startLinkedin(profile:any) {
   if(!profile.search.enabled||!profile.search.sources.apify_bebity.enabled) return {source:'apify_bebity',skip:'profile_source_disabled'};
+  if(!apifyToken) return {source:'apify_bebity',skip:'apify_token_missing'};
   const [account,limits]=await Promise.all([apify('users/me'),apify('users/me/limits')]);
   const plan=account.data?.plan, l=limits.data;
   if(plan?.id!=='FREE'||plan?.monthlyBasePriceUsd!==0||plan?.monthlyUsageCreditsUsd!==5
@@ -76,6 +81,7 @@ async function startLinkedin(profile:any) {
   const reserved=await rpc('radar_reserve_collection',{p_source:'apify_bebity',p_reserve:0.05});
   if(!reserved.run) return {source:'apify_bebity',...reserved};
   const id=reserved.run.id; const selected=collectionPlan(profile,reserved.slot,'apify_bebity');
+  if(!selected.enabled||!('input' in selected)) return {source:'apify_bebity',...await fail(id,'collection_lane_changed')};
   await db(`radar_collection_runs?id=eq.${id}`,{metrics:{lane:selected.lane,input:selected.input,profile_revision:profile.revision,search_plan:selected,build:'0.0.226',max_charge_usd:0.05}},'PATCH');
   // Never retry this POST blindly: a network failure may mean it already started.
   try {
@@ -132,9 +138,9 @@ Deno.serve(async req=>{
       case 'profile': return reply(await rpc('radar_get_profile'));
       case 'search_plan': {
         const profile=validateProfile(await rpc('radar_get_profile'));
-        const slot=p.slot??Math.floor((Date.now()/1000-14400)/43200);
+        const slot=p.slot??collectionSlot();
         if(!Number.isSafeInteger(slot)||slot<0) return reply({error:'invalid_slot'},400);
-        return reply({profile_revision:profile.revision,plans:['apify_bebity','himalayas','remotive','wwr'].map(id=>collectionPlan(profile,slot,id))});
+        return reply({profile_revision:profile.revision,plans:sourceIds.map(id=>collectionPlan(profile,slot,id))});
       }
       case 'status': return reply(await rpc('radar_get_status'));
       case 'claim': return reply(await rpc('radar_claim_jobs',{p_limit:p.limit??10}));
@@ -153,6 +159,7 @@ Deno.serve(async req=>{
         const results=await Promise.allSettled([publicCollect('himalayas',profile),publicCollect('remotive',profile),publicCollect('wwr',profile),startLinkedin(profile)]);
         return reply(results.map((r,i)=>r.status==='fulfilled'?r.value:{source:['himalayas','remotive','wwr','apify_bebity'][i],error:'collector_request_failed'}));
       }
+      default: return reply({error:'unknown_action'},400);
     }
   } catch {return reply({error:'request_failed',action:input.action},502);}
 });

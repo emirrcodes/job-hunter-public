@@ -1,28 +1,9 @@
-# job-radar
+# Job Radar Edge Function
 
-Canlı tek Edge Function: sabit kaynak collector'ları ve kapsamlı token ile korunan
-JSON HTTP API. `verify_jwt=false`; kimlik doğrulaması fonksiyon içinde yapılır.
+The gateway handles fixed provider adapters and a JSON API. `verify_jwt = false` allows the gateway to check its own scoped tokens. A missing or unknown token returns 401. An action outside the token’s scope returns 403.
 
-| Scope | Eylemler |
-|---|---|
-| collector | collect, poll |
-| reader | status, shortlist, profile, search_plan |
-| evaluator | reader eylemleri + claim, save_evaluation, briefing_window, save_briefing, deliver_briefing |
+Supabase injects `SUPABASE_SECRET_KEYS` (or the legacy `SUPABASE_SERVICE_ROLE_KEY`) into the server runtime. Deploy adds three separate `RADAR_*_TOKEN` scope secrets and `APIFY_TOKEN` if LinkedIn is enabled. Credentials are used server-side. The API accepts neither SQL nor arbitrary provider URLs as inputs.
 
-Sırlar: APIFY_TOKEN ve üç ayrı RADAR_*_TOKEN. DB erişimi Supabase'in otomatik sağladığı
-SUPABASE_SERVICE_ROLE_KEY ile yalnızca sunucuda. Collector/evaluator token'ları SQL
-anahtarı değildir; izin listesi dışındaki eylemler 403 döner. Parametreyle SQL, kaynak URL
-veya actor adı kabul edilmez.
+Collection reads the live profile. Each start has a reserved slot and a budget. The LinkedIn Actor starts asynchronously and poll fetches only existing runs. An ambiguous start blocks further runs until reconciled. Re-ingesting a completed run returns the stored receipt.
 
-LinkedIn asenkron başlar; dış run id kaydedilir ve istek biter. Poll mevcut run sonucunu
-alır. Ücretli başlangıç POST'u otomatik tekrar edilmez. Belirsiz başlangıç `unknown`
-olur; yeni LinkedIn run'ını bloklar. Normalleştirme ve tüm batch ingestion tek DB
-transaction'ında çalışır; aynı run yeniden teslim edilince önceki receipt döner.
-
-Supabase Cron toplama çağrısını günde iki kez yapar. Poll görevi DB'de aktif run yoksa
-Edge Function çağrısı dahi yapmaz. Arama kelimeleri, konumlar, filtreler ve kaynak limitleri canlı tek profilden derlenir.
-Kodda yalnızca provider protokolü ve ücretsiz kullanım güvenlik tavanları sabittir.
-Ayar değişikliği profile:push ile yapılır; yeniden deploy gerekmez.
-
-Deploy: `node scripts/deploy.mjs`. İstemci: `node scripts/radar.mjs <action>`.
-Bulut değerlendirici bağlantısı ve JSON sözleşmesi: `docs/CLOUD.md`.
+Use `npm run setup:deploy` from the repo root. For actions and the evaluation payload, see [the gateway contract](../../docs/CLOUD.md). For provisioning and scheduling, follow [the setup guide](../../docs/SETUP.md).

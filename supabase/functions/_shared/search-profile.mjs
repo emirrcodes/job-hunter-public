@@ -1,103 +1,152 @@
-import {linkedinSearchUrl,linkedinUrlInput} from './linkedin.mjs';
-const sourceIds=['apify_bebity','himalayas','remotive','wwr'];
-const workIds={on_site:'1',remote:'2',hybrid:'3'};
-const experienceIds={internship:'1',entry_level:'2',associate:'3',mid_senior:'4',director:'5'};
-const fold=value=>String(value??'').normalize('NFKD').replace(/\p{M}/gu,'').replaceAll('ı','i').toLowerCase();
-const has=(value,terms)=>terms.some(term=>fold(value).includes(fold(term)));
-const integer=(n,min,max)=>Number.isInteger(n)&&n>=min&&n<=max;
-function list(value){return Array.isArray(value)&&value.length>0&&value.every(s=>typeof s==='string'&&s.trim());}
+import { linkedinSearchUrl, linkedinUrlInput } from './linkedin.mjs';
+import * as legacy from './search-profile-v1.mjs';
+
+export const sourceIds = ['apify_bebity', 'himalayas', 'remotive', 'wwr'];
+const workIds = { on_site: '1', remote: '2', hybrid: '3' };
+const experienceIds = { internship: '1', entry_level: '2', associate: '3', mid_senior: '4', director: '5', executive: '6' };
+const employmentTypes = {
+  full_time: { linkedin: 'F', himalayas: 'Full Time' },
+  part_time: { linkedin: 'P', himalayas: 'Part Time' },
+  contract: { linkedin: 'C', himalayas: 'Contractor' },
+  temporary: { linkedin: 'T', himalayas: 'Temporary' },
+  internship: { linkedin: 'I', himalayas: 'Intern' },
+  volunteer: { linkedin: 'V', himalayas: 'Volunteer' },
+  other: { linkedin: 'O', himalayas: 'Other' },
+};
+const fold = value => String(value ?? '').normalize('NFKD').replace(/\p{M}/gu, '').toLowerCase();
+const has = (value, terms) => terms.some(term => fold(value).includes(fold(term)));
+const integer = (n, min, max) => Number.isInteger(n) && n >= min && n <= max;
+const strings = value => Array.isArray(value) && value.every(item => typeof item === 'string' && item.trim());
+const choices = (values, map) => strings(values) && values.every(value => Object.hasOwn(map, value));
+export const collectionSlot = (now = Date.now()) => Math.floor((now / 1000 - 14400) / 43200);
+
 export function validateProfile(profile) {
-  const s=profile?.search; const errors=[];
-  if(!profile?.version||!profile?.search_tracks||s?.schema_version!==1) throw new Error('Profile/search schema missing');
-  if(typeof s.enabled!=='boolean'||!integer(s.freshness_days,1,90)||!integer(s.internship_freshness_days,1,90)) errors.push('freshness/enabled');
-  if(!list(s.experience_levels)||s.experience_levels.some(x=>!experienceIds[x])) errors.push('experience_levels');
-  if(!list(profile.preferences?.employment_priority?.primary)||!list(profile.preferences?.employment_priority?.high)
-    ||!profile.preferences.employment_priority.primary.includes('full_time')||!profile.preferences.employment_priority.high.includes('internship')) errors.push('full-time and internship priorities');
-  if(!Array.isArray(s.rotation)||!s.rotation.length||s.rotation.length>100) errors.push('rotation');
-  else for(const entry of s.rotation) {
-    if(!list(profile.search_tracks[entry.track])||!s.geographies?.[entry.lane]) errors.push(`rotation ${entry.track}/${entry.lane}`);
+  const s = profile?.search;
+  if (s?.schema_version === 1) return legacy.validateProfile(profile);
+  if (typeof profile?.version !== 'string' || !profile.version.trim() || !profile.search_tracks || s?.schema_version !== 2) {
+    throw new Error('Profile/search schema missing');
   }
-  if(!list(profile.search_tracks.internship)) errors.push('internship keywords');
-  for(const [name,g] of Object.entries(s.geographies||{})) {
-    if(!/^\d+$/.test(g.geo_id||'')||!g.label||!g.verified_at||!list(g.work_types)||g.work_types.some(x=>!workIds[x])
-      ||!/^[A-Z]{2}$/.test(g.country||'')||!list(g.country_aliases)||!Array.isArray(g.quality_markers)) errors.push(`geography ${name}`);
+  const errors = [];
+  if (typeof s.enabled !== 'boolean' || !integer(s.freshness_days, 1, 90)) errors.push('freshness/enabled');
+  if (!choices(s.experience_levels, experienceIds)) errors.push('experience_levels');
+  if (!choices(s.employment_types, employmentTypes)) errors.push('employment_types');
+  if (!strings(profile.preferences?.work_country_aliases) || !profile.preferences.work_country_aliases.length) {
+    errors.push('preferences.work_country_aliases');
   }
-  for(const id of sourceIds) if(typeof s.sources?.[id]?.enabled!=='boolean') errors.push(`source ${id}`);
-  const li=s.sources?.apify_bebity;
-  if(!integer(li?.primary_queries,1,2)||li?.internship_queries!==1||!integer(li?.results_per_query,1,10)
-    ||(li.primary_queries+li.internship_queries)*li.results_per_query>20) errors.push('LinkedIn trial cap (max 20)');
-  const h=s.sources?.himalayas;
-  if(h?.primary_queries!==1||h?.internship_queries!==1||!integer(h.pages_per_query,1,3)||h.results_per_page!==20||!['recent','relevant'].includes(h.sort)) errors.push('Himalayas bounds');
-  if(!integer(s.sources?.remotive?.result_limit,1,400)||!s.sources?.remotive?.category) errors.push('Remotive bounds');
-  if(!integer(s.sources?.wwr?.item_limit,1,400)) errors.push('WWR bounds');
-  for(const field of ['title_terms','excluded_title_terms','excluded_seniority_terms','early_career_terms'])
-    if(!list(s.filters?.[field])) errors.push(`filters.${field}`);
-  if(s.filters?.seniority_handling!==undefined&&!['prefilter','model_review'].includes(s.filters.seniority_handling)) errors.push('filters.seniority_handling');
-  if(s.filters?.keep_unknown_fields!==true) errors.push('unknown fields must be retained');
-  if(errors.length) throw new Error(`Invalid search profile: ${errors.join(', ')}`);
+  if (!Array.isArray(s.rotation) || !s.rotation.length || s.rotation.length > 100) errors.push('rotation');
+  else for (const entry of s.rotation) {
+    const track = profile.search_tracks[entry?.track];
+    if (!strings(track) || !track.length || !Object.hasOwn(s.geographies ?? {}, entry?.lane)) errors.push('rotation track or geography');
+  }
+  for (const [name, geography] of Object.entries(s.geographies ?? {})) {
+    if (!geography || typeof geography.label !== 'string' || !geography.label.trim() || !choices(geography.work_types, workIds)
+      || !geography.work_types.length || !/^[A-Z]{2}$/.test(geography.country ?? '')) errors.push(`geography ${name}`);
+    if (s.sources?.apify_bebity?.enabled && (!/^\d+$/.test(geography?.geo_id ?? '') || !/^\d{4}-\d{2}-\d{2}$/.test(geography?.verified_at ?? '')
+      || !strings(geography?.quality_markers))) errors.push(`verified LinkedIn geography ${name}`);
+  }
+  for (const id of sourceIds) if (typeof s.sources?.[id]?.enabled !== 'boolean') errors.push(`source ${id}`);
+  const linkedin = s.sources?.apify_bebity;
+  if (!integer(linkedin?.queries, 1, 4) || !integer(linkedin?.results_per_query, 1, 10)
+    || linkedin.queries * linkedin.results_per_query > 20) errors.push('LinkedIn trial cap (max 20)');
+  const himalayas = s.sources?.himalayas;
+  if (!integer(himalayas?.pages_per_query, 1, 3) || !['recent', 'relevant'].includes(himalayas.sort)) errors.push('Himalayas bounds');
+  const remotive = s.sources?.remotive;
+  if (!integer(remotive?.result_limit, 1, 400) || typeof remotive.category !== 'string') errors.push('Remotive bounds');
+  if (!integer(s.sources?.wwr?.item_limit, 1, 400)) errors.push('WWR bounds');
+  for (const field of ['title_terms', 'excluded_title_terms', 'excluded_seniority_terms']) {
+    if (!strings(s.filters?.[field])) errors.push(`filters.${field}`);
+  }
+  if (errors.length) throw new Error(`Invalid search profile: ${errors.join(', ')}`);
   return profile;
 }
+
 export async function publishableProfile(profile) {
-  const copy=structuredClone(validateProfile(profile));delete copy.revision;delete copy.evaluation_version;
-  function ordered(v){if(Array.isArray(v))return v.map(ordered);if(v&&typeof v==='object')return Object.fromEntries(Object.keys(v).sort().map(k=>[k,ordered(v[k])]));return v;}
-  const hash=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(JSON.stringify(ordered(copy))));
-  copy.revision=Array.from(new Uint8Array(hash),x=>x.toString(16).padStart(2,'0')).join('');
-  copy.evaluation_version=`${copy.version}+${copy.revision.slice(0,12)}`;
+  const copy = structuredClone(validateProfile(profile));
+  delete copy.revision;
+  delete copy.evaluation_version;
+  function ordered(value) {
+    if (Array.isArray(value)) return value.map(ordered);
+    if (value && typeof value === 'object') {
+      return Object.fromEntries(Object.entries(value).map(([key, child]) => [key, ordered(child)]).sort(([a], [b]) => (a > b) - (a < b)));
+    }
+    return value;
+  }
+  const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(JSON.stringify(ordered(copy))));
+  copy.revision = Array.from(new Uint8Array(hash), value => value.toString(16).padStart(2, '0')).join('');
+  copy.evaluation_version = `${copy.version}+${copy.revision.slice(0, 12)}`;
   return copy;
 }
-export function collectionPlan(profile,slot,source) {
+
+export function collectionPlan(profile, slot, source) {
+  if (profile?.search?.schema_version === 1) return legacy.collectionPlan(profile, slot, source);
   validateProfile(profile);
-  if(!Number.isSafeInteger(slot)||slot<0) throw new Error('Invalid collection slot');
-  const s=profile.search,config=s.sources[source];
-  if(!s.enabled||!config?.enabled) return {source,enabled:false};
-  const rotation=s.rotation[slot%s.rotation.length];
-  const geography=s.geographies[rotation.lane];
-  const keywords=profile.search_tracks[rotation.track];
-  const cycle=Math.floor(slot/s.rotation.length);
-  const primary=Array.from({length:config.primary_queries||1},(_,i)=>keywords[(cycle+i)%keywords.length]);
-  const internship=profile.search_tracks.internship[(slot+cycle)%profile.search_tracks.internship.length];
-  const result={source,enabled:true,profile_revision:profile.revision,lane:rotation.lane,track:rotation.track,geography};
-  if(source==='apify_bebity') {
-    const common={geography:{geoId:geography.geo_id,label:geography.label},workTypes:geography.work_types.map(x=>workIds[x])};
-    const urls=primary.map(keyword=>linkedinSearchUrl({...common,keyword,experienceLevels:s.experience_levels.map(x=>experienceIds[x]),contractTypes:['F'],ageSeconds:s.freshness_days*86400}));
-    urls.push(linkedinSearchUrl({...common,keyword:internship,experienceLevels:[experienceIds.internship],contractTypes:['I'],ageSeconds:s.internship_freshness_days*86400}));
-    return {...result,input:linkedinUrlInput(urls,config.results_per_query),max_results:urls.length*config.results_per_query};
+  if (!Number.isSafeInteger(slot) || slot < 0) throw new Error('Invalid collection slot');
+  if (!sourceIds.includes(source)) throw new Error('Unsupported source');
+  const s = profile.search;
+  const config = s.sources[source];
+  if (!s.enabled || !config.enabled) return { source, enabled: /** @type {const} */ (false) };
+  const rotation = s.rotation[slot % s.rotation.length];
+  const geography = s.geographies[rotation.lane];
+  if (source !== 'apify_bebity' && !geography.work_types.includes('remote')) {
+    return { source, enabled: /** @type {const} */ (false), reason: 'remote_source_outside_lane' };
   }
-  if(source==='himalayas') {
-    const urls=[];
-    for(const [keyword,employmentType] of [[primary[0],'Full Time'],[internship,'Intern']]) {
-      for(let page=1;page<=config.pages_per_query;page++) {
-        const url=new URL('https://himalayas.app/jobs/api/search');
-        url.search=new URLSearchParams({q:keyword,country:geography.country,employment_type:employmentType,sort:config.sort,page:String(page)});
-        urls.push(url.toString());
-      }
-    }
-    return {...result,urls,max_results:urls.length*config.results_per_page};
+  const keywords = [...new Set(profile.search_tracks[rotation.track])];
+  const cycle = Math.floor(slot / s.rotation.length);
+  const result = { source, enabled: /** @type {const} */ (true), profile_revision: profile.revision, lane: rotation.lane, track: rotation.track, geography };
+  if (source === 'apify_bebity') {
+    const urls = Array.from({ length: Math.min(config.queries, keywords.length) }, (_, index) => linkedinSearchUrl({
+      keyword: keywords[(cycle + index) % keywords.length],
+      geography: { geoId: geography.geo_id, label: geography.label },
+      workTypes: geography.work_types.map(value => workIds[value]),
+      experienceLevels: s.experience_levels.map(value => experienceIds[value]),
+      contractTypes: s.employment_types.map(value => employmentTypes[value].linkedin),
+      ageSeconds: s.freshness_days * 86400,
+    }));
+    return { ...result, input: linkedinUrlInput(urls, config.results_per_query), max_results: urls.length * config.results_per_query };
   }
-  if(source==='remotive') {
-    const url=new URL('https://remotive.com/api/remote-jobs');
-    url.search=new URLSearchParams({category:config.category,limit:String(config.result_limit)});
-    return {...result,urls:[url.toString()],max_results:config.result_limit};
+  if (source === 'himalayas') {
+    const urls = Array.from({ length: config.pages_per_query }, (_, index) => {
+      const url = new URL('https://himalayas.app/jobs/api/search');
+      url.search = new URLSearchParams({ q: keywords[cycle % keywords.length], country: geography.country, sort: config.sort, page: String(index + 1) });
+      if (s.employment_types.length) url.searchParams.set('employment_type', s.employment_types.map(value => employmentTypes[value].himalayas).join(','));
+      return url.toString();
+    });
+    return { ...result, urls, max_results: urls.length * 20 };
   }
-  if(source==='wwr') return {...result,urls:['https://weworkremotely.com/remote-jobs.rss'],max_results:config.item_limit};
-  throw new Error('Unsupported source');
+  if (source === 'remotive') {
+    const url = new URL('https://remotive.com/api/remote-jobs');
+    if (config.category) url.searchParams.set('category', config.category);
+    url.searchParams.set('limit', String(config.result_limit));
+    return { ...result, urls: [url.toString()], max_results: config.result_limit };
+  }
+  return { ...result, urls: ['https://weworkremotely.com/remote-jobs.rss'], max_results: config.item_limit };
 }
-export function jobMatchesProfile(job,profile,now=Date.now()) {
-  const s=profile.search,filter=s.filters;
-  if(has(job.title,filter.excluded_title_terms)) return {accepted:false,reason:'excluded_role'};
-  if(!has(job.title,filter.title_terms)) return {accepted:false,reason:'unrelated_role'};
-  const early=has(job.title,filter.early_career_terms);
-  // Archived profiles retain their original gate; current profiles can defer title labels to the evaluator.
-  if(filter.seniority_handling!=='model_review'&&!early&&has(job.title,filter.excluded_seniority_terms)) return {accepted:false,reason:'senior_role'};
-  const type=String(job.source_claims?.apify_bebity?.contractType||job.source_claims?.himalayas?.employmentType||job.source_claims?.remotive?.job_type||job.source_claims?.wwr?.type||'');
-  const internship=has(type,['intern','staj'])||has(job.title,['intern','staj']);
-  const maxAge=(internship?s.internship_freshness_days:s.freshness_days)*86400000;
-  const published=Date.parse(job.published_at||'');
-  if(Number.isFinite(published)&&published<now-maxAge) return {accepted:false,reason:'older_than_window'};
-  const aliases=Object.values(s.geographies).flatMap(g=>g.country_aliases);
-  if(Array.isArray(job.country_restrictions)&&job.country_restrictions.length&&!job.country_restrictions.some(c=>aliases.some(a=>fold(c)===fold(a))))
-    return {accepted:false,reason:'explicit_country_restriction'};
-  if(/\b(USA|US|United States|Canada|North America|Americas|UK|United Kingdom|Australia)\s+Only\b/i.test(job.location||''))
-    return {accepted:false,reason:'explicit_country_restriction'};
-  return {accepted:true,reason:internship?'high_priority_internship':'primary_or_adjacent'};
+
+export function jobMatchesProfile(job, profile, now = Date.now()) {
+  const s = profile.search;
+  if (s.schema_version === 1) return legacy.jobMatchesProfile(job, profile, now);
+  const filter = s.filters;
+  if (has(job.title, filter.excluded_title_terms)) return { accepted: false, reason: 'excluded_role' };
+  if (filter.title_terms.length && !has(job.title, filter.title_terms)) return { accepted: false, reason: 'unrelated_role' };
+  if (has(job.title, filter.excluded_seniority_terms)) return { accepted: false, reason: 'excluded_seniority' };
+  const published = Date.parse(job.published_at ?? '');
+  if (Number.isFinite(published) && published < now - s.freshness_days * 86400000) return { accepted: false, reason: 'older_than_window' };
+  const aliases = new Set(profile.preferences.work_country_aliases.map(fold));
+  if (Array.isArray(job.country_restrictions) && job.country_restrictions.length && !job.country_restrictions.some(country => aliases.has(fold(country)))) {
+    return { accepted: false, reason: 'explicit_country_restriction' };
+  }
+  const remoteOrHybrid = fold(job.work_type).replace(/[^a-z]/g, '');
+  const workType = remoteOrHybrid === 'onsite' ? 'on_site' : remoteOrHybrid;
+  if (Object.hasOwn(workIds, workType) && !s.rotation.some(entry => s.geographies[entry.lane].work_types.includes(workType))) {
+    return { accepted: false, reason: 'excluded_work_type' };
+  }
+  const rawType = job.source_claims?.apify_bebity?.contractType ?? job.source_claims?.himalayas?.employmentType
+    ?? job.source_claims?.remotive?.job_type ?? job.source_claims?.wwr?.type;
+  const normalizeEmployment = value => fold(value).replace(/[^a-z]/g, '').replace(/^(contractor|freelance)$/, 'contract').replace(/^intern$/, 'internship');
+  const employmentType = normalizeEmployment(rawType);
+  const explicitType = Object.keys(employmentTypes).find(value => normalizeEmployment(value) === employmentType);
+  if (explicitType && s.employment_types.length && !s.employment_types.includes(explicitType)) {
+    return { accepted: false, reason: 'excluded_employment_type' };
+  }
+  return { accepted: true, reason: 'matches_profile' };
 }

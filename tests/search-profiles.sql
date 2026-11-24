@@ -4,6 +4,9 @@ begin if ok is distinct from true then raise exception 'FAIL: %',label; end if; 
 insert into public.radar_jobs(id,identity_key,title,company,source_url) values
 ('00000000-0000-0000-0000-000000000041','profile-test','Software Engineer','Example','https://example.com/41');
 insert into public.radar_user_decisions(job_id,status) values('00000000-0000-0000-0000-000000000041','saved');
+select pg_temp.assert((select profile_version='profile-not-configured' from public.radar_evaluation_queue),'new jobs wait on the installation profile default');
+insert into public.radar_searches(source_id,name,lane) values('himalayas','synthetic-search','germany-hybrid');
+select pg_temp.assert((select lane='germany-hybrid' from public.radar_searches),'search lane accepts a user-defined name');
 select public.radar_publish_profile(jsonb_build_object('version','test','revision',repeat('a',64),'evaluation_version','profile-a','search','{}'::jsonb));
 select pg_temp.assert(public.radar_get_profile()->>'evaluation_version'='profile-a','live profile is readable');
 select pg_temp.assert((select profile_version='profile-a' from public.radar_evaluation_queue),'publish updates evaluation profile');
@@ -36,4 +39,11 @@ select public.radar_reclassify_jobs(repeat('c',64),'[{"job_id":"00000000-0000-00
 select pg_temp.assert((select discovery_state='quarantined' from public.radar_jobs),'profile edit cannot revive quarantined provider data');
 select pg_temp.assert(not exists(select 1 from public.radar_claim_jobs(1)),'quarantine survives profile publication');
 select pg_temp.assert((select count(*)=1 from public.radar_jobs),'quarantine retains raw/canonical evidence');
+select public.radar_save_briefing(now(),'{}'::jsonb);
+select pg_temp.assert((select timezone='UTC' from public.radar_briefings),'briefings default to UTC');
+select public.radar_publish_profile(jsonb_build_object('version','test','revision',repeat('d',64),'evaluation_version','profile-d',
+  'search','{}'::jsonb,'preferences',jsonb_build_object('timezone','Europe/Berlin')));
+select public.radar_save_briefing(now(),'{}'::jsonb);
+select pg_temp.assert(exists(select 1 from public.radar_briefings where timezone='Europe/Berlin'
+  and briefing_day=(now() at time zone 'Europe/Berlin')::date),'briefings use the configured timezone');
 rollback;

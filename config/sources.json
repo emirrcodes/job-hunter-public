@@ -1,16 +1,16 @@
 {
   "schedule": {
-    "timezone": "Europe/Istanbul",
+    "timezone": "UTC",
     "collection_runs_per_day": 2,
     "collection_times": [
-      "07:00",
-      "19:00"
+      "04:00",
+      "16:00"
     ],
     "evaluation_runs_per_day": 0,
     "evaluation_time": null,
     "collection_enabled": false,
     "evaluation_enabled": false,
-    "note": "Collection Cron is optional after a successful pilot. Automatic daily agent review is cancelled; evaluation is on demand only."
+    "note": "Collection Cron is optional after a successful pilot. Agent review is on demand."
   },
   "spending": {
     "mode": "trial_only",
@@ -117,7 +117,7 @@
       "stage": "research",
       "url": "https://euremotejobs.com/jobs/",
       "enabled": false,
-      "note": "Turkey/EMEA/Worldwide filters verified; automated ingestion method not verified."
+      "note": "No implemented adapter."
     }
   ]
 }

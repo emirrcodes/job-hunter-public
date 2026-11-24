@@ -12,12 +12,6 @@ export function iso(value) {
   const date = new Date(typeof value==='number' && value<1e12?value*1000:value);
   return Number.isNaN(+date)?null:date.toISOString();
 }
-// Broad relevance gate, not a seniority or country gate. Rejected counts are recorded.
-export function relevant(raw) {
-  const title = String(raw.title || '');
-  return /software|develop|engineer|backend|back.end|full.stack|frontend|front.end|react|typescript|python|java\b|\.net|node\b|programmer|automation|machine.learning|yazılım/i.test(title)
-    && !/sales engineer|civil engineer|mechanical engineer|electrical engineer|chemical engineer|manufacturing engineer/i.test(title);
-}
 export function normalize(source,raw) {
   let job;
   if (source==='apify_bebity') job=normalizeLinkedin(source,raw);
@@ -56,11 +50,12 @@ export function normalize(source,raw) {
     salary:raw.salary,contractType:raw.contractType,scrapingInfo:raw.scrapingInfo,attribution:'LinkedIn via Apify/Bebity'}};
   return {job,provider_job_id:String(raw.id||raw.guid||raw.jobUrl||raw.url||raw.link||''),raw};
 }
-export function batch(source,records,{profile,now=Date.now()}={}) {
+/** @param {{profile?: object, now?: number}} [options] */
+export function batch(source,records,options={}) {
+  const {profile,now=Date.now()}=options;
   if(!Array.isArray(records)) throw new Error('Invalid provider records');
   const items=[]; let invalid=0,irrelevant=0; const filtered_by_reason={};
   for(const raw of records) {
-    if(!profile&&!relevant(raw)){irrelevant++;continue;}
     try {
       const item=normalize(source,raw);
       if(profile) {

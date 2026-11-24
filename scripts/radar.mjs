@@ -1,5 +1,5 @@
 import {readFileSync,writeFileSync} from 'node:fs';
-import {loadEnv} from './lib.mjs';
+import {gatewayTarget,loadEnv} from './lib.mjs';
 loadEnv();
 const action=process.argv[2]||'status';
 const scopes={collect:'COLLECTOR',poll:'COLLECTOR',claim:'EVALUATOR',save_evaluation:'EVALUATOR',
@@ -12,7 +12,7 @@ const limitFlag=process.argv.indexOf('--limit');
 if(limitFlag!==-1) params.limit=+process.argv[limitFlag+1];
 const slotFlag=process.argv.indexOf('--slot');
 if(slotFlag!==-1) params.slot=+process.argv[slotFlag+1];
-const response=await fetch(`${process.env.SUPABASE_URL}/functions/v1/job-radar`,{
+const response=await fetch(`${gatewayTarget()}/functions/v1/job-radar`,{
     method:'POST',headers:{Authorization:`Bearer ${process.env[`RADAR_${scopes[action]}_TOKEN`]||(scopes[action]==='READER'?process.env.RADAR_EVALUATOR_TOKEN:'')}`,'Content-Type':'application/json'},
   body:JSON.stringify({action,params}),signal:AbortSignal.timeout(100000),
 });

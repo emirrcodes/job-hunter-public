@@ -1,34 +1,9 @@
-# Kendi ajanımla Job Hunter Public kurulumu
+# Set up this Job Hunter copy for me
 
-Bu repoyu benim için kendi Supabase ve Apify hesaplarımla kur.
-Önce AGENTS.md ve docs/SETUP.md dosyalarını oku. Repoda canlı bir kurulum olduğu
-veya örnek profilin benim CV'm olduğu varsayımı yapma.
+Clone the repository into my workspace. Read `AGENTS.md`, `docs/SETUP.md` and `docs/SEARCH_PROFILE.md`. Ask me for the roles I want, locations, eligibility or sponsorship constraints, employment types, work arrangements, seniority, preferred languages, report language, and the experience I want the reviewer to use. Ask which sources I want. Use my answers to replace the fictional example in `local/profile.json`, including the title filters, geography and search rotation. Keep private CV and other working files under `local/`.
 
-1. Node 22+, npm, Supabase CLI ve psql erişimini kontrol et. npm ci ve setup:init
-   çalıştır. Mevcut gizli ayarları koru; anahtar değerlerini çıktıya yazma.
-2. Eksik Supabase proje ref/URL, yönetim token'ı, DB bağlantısı/parolası ve Apify
-   token'ı için .env.local dosyası veya gizli ayar alanını göster. Anahtarları
-   sohbetten isteme. Yeni hesap ve ödeme işlemlerini kullanıcı kendi arayüzünden yapar.
-3. CV'm ve arama tercihlerim eksikse bunları sor; bağımsız yerel kontrollerle devam et.
-   Adımı hesap adından çıkarma. Deneyim, dil, izin, maaş veya mezuniyet uydurma.
-   config/profile.json dosyasını doğrulanmış bilgilerimle kişiselleştir.
-4. npm test, profile:check, plan -- --slot 0 ve db:plan çalıştır. Arama kapsamını ve
-   kendi hedef projeyi incele. Ücretsiz kullanım sınırlarını koru.
-5. Rehber sırasıyla access:check, setup:provision, db:whoami -- --role migration,
-   db:migrate, db:grant-roles, profile:push, setup:deploy, profile:status ve gateway:smoke
-   adımlarını tamamla. Global Supabase login/link hesabını değiştirme.
-6. Bu kurulum isteği tek pilotu kapsar: pilot:enable ardından bir collect çağrısı yap.
-   Kredi tüketebileceğini ve 0,05 USD tavanını bildir. Durum/poll ile mevcut run'ı
-   tamamla. Belirsiz başlangıcı tekrar etme; her kaynağın sonucunu ayrı kontrol et.
-7. prompts/review.md sözleşmesiyle tek gerçek claim/save/shortlist testi yap.
-   İş yoksa sahte veri yazma. Değerlendirme için canlı profili oku.
-8. Kendi projemin adresini, test/pilot sonucunu ve eksikleri anahtarsız raporla.
-   Kurulum isteğimde zamanlama da varsa pilot koşulları sağlanınca toplama Cron'unu
-   kur ve durumunu doğrula. İstenmemiş zamanlama veya ücretli model worker'ı kurma.
-9. İstek üzerine kullanımda status/shortlist ve küçük claim/save partilerini anlat.
-   Bulut ajanı isteniyorsa yalnızca URL/evaluator token ile ayrı ortam testi yap.
-   Günlük otomatik ajan kontrolü iptal edilmiştir; değerlendirme yalnızca kullanıcı
-   istediğinde yapılır. Ajan zamanlaması veya onun yerine yerel otomasyon kurma.
+Adapt the configuration or code in my local copy when a source cannot represent the requested search. Tell me which part of my search each enabled source covers. Do not invent a LinkedIn location ID. If I want LinkedIn, ask me for a verified geography and help me check the current Apify account and Actor costs. Use the default cost limits. If I choose not to use LinkedIn, disable its source and leave Apify unconfigured.
 
-Başvuru yapma, kişilere mesaj gönderme, insan kararlarını değiştirme.
-Public paylaşılacak kopyaya kişisel profil, anahtar, ham veri veya özel Git geçmişi ekleme.
+Prepare the local profile and run tests. Show me the search plan and ask me to enter my own project credentials in `.env.local` using a private editor. Keep actual secrets out of chat and shell output. Verify the Supabase target before writing. Follow the migration, deploy and smoke steps. Confirm before starting a real collection run that may use Apify credit. Only set up the collection schedule if I ask for it.
+
+Once a real candidate exists, use my live profile and the scoped evaluator token to complete one claim, save and shortlist round trip. Tell me which checks passed, which sources actually ran and what is still pending. Keep the review available when I request it.

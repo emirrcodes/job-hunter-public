@@ -3,9 +3,9 @@ begin;
 create extension if not exists pg_cron with schema pg_catalog;
 create extension if not exists pg_net with schema extensions;
 do $$ begin
-  if (select count(*) from public.radar_sources s where id in ('himalayas','remotive','wwr','apify_bebity')
-    and exists(select 1 from public.radar_collection_runs r where r.source_id=s.id and r.state in ('succeeded','partial') and r.accepted_count>0))<>4 then
-    raise exception 'All four sources must complete a nonempty pilot first';
+  if not exists(select 1 from public.radar_sources s join public.radar_collection_runs r on r.source_id=s.id
+    where s.enabled and r.state in ('succeeded','partial') and r.accepted_count>0) then
+    raise exception 'Run a pilot and verify at least one accepted job from an enabled source first';
   end if;
 end; $$;
 create or replace function public.radar_invoke_collection(p_action text)
@@ -27,5 +27,5 @@ end; $$;
 revoke all on function public.radar_invoke_collection(text) from public,anon,authenticated,service_role;
 select cron.schedule('radar-collect-twice-daily','0 4,16 * * *',$q$select public.radar_invoke_collection('collect');$q$);
 select cron.schedule('radar-poll-existing-runs','*/5 * * * *',$q$select public.radar_invoke_collection('poll');$q$);
-update public.radar_sources set stage='active' where id in ('himalayas','remotive','wwr','apify_bebity');
+update public.radar_sources set stage='active' where enabled;
 commit;
